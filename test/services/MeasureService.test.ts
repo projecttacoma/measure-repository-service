@@ -2,6 +2,7 @@ import { initialize, Server } from '@projecttacoma/node-fhir-server-core';
 import { serverConfig } from '../../src/config/serverConfig';
 import { cleanUpTestDatabase, setupTestDatabase } from '../utils';
 import supertest from 'supertest';
+import { Calculator } from 'fqm-execution';
 
 let server: Server;
 
@@ -345,6 +346,74 @@ describe('MeasureService', () => {
         });
     });
   });
+
+  describe('$data-requirements', () => {
+    // spy on calculation function
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: {
+        resourceType: 'Library',
+        type: {
+          coding: [{ code: 'module-definition', system: 'http://terminology.hl7.org/CodeSystem/library-type' }]
+        },
+        status: 'draft',
+        dataRequirement: []
+      }
+    });
+    
+    it('returns 200 and a Library for a simple measure with dependencies and no period params', async () => {
+      await supertest(server.app)
+        .post('/4_0_1/Measure/$data-requirements')
+        .send({ resourceType: 'Parameters', parameter: [{ name: 'id', valueString: 'testWithRootLibAndDeps' }] })
+        .set('content-type', 'application/fhir+json')
+        .expect(200)
+        .then(response => {
+          expect(response.body.resourceType).toEqual('Library');
+          expect(response.body.dataRequirement).toHaveLength(0);
+        });
+    });
+    
+    it('returns 200 and a Library for a request with id in the url', async () => {
+      await supertest(server.app)
+        .post('/4_0_1/Measure/testWithRootLibAndDeps/$data-requirements')
+        .set('content-type', 'application/fhir+json')
+        .expect(200)
+        .then(response => {
+          expect(response.body.resourceType).toEqual('Library');
+          expect(response.body.dataRequirement).toHaveLength(0);
+        });
+    });
+    
+    it('returns 200 with passed period parameters', async () => {
+      await supertest(server.app)
+        .post('/4_0_1/Measure/$data-requirements')
+        .send({
+          resourceType: 'Parameters',
+          parameter: [
+            { name: 'id', valueString: 'testWithRootLibAndDeps' },
+            { name: 'periodStart', valueString: '2022-01-01' },
+            { name: 'periodEnd', valueString: '2022-12-31' }
+          ]
+        })
+        .set('content-type', 'application/fhir+json')
+        .expect(200)
+        .then(response => {
+          expect(response.body.resourceType).toEqual('Library');
+          expect(response.body.dataRequirement).toHaveLength(0);
+        });
+    });
+
+    it('returns 200 with query params', async () => {
+      await supertest(server.app)
+        .get('/4_0_1/Measure/$data-requirements?id=testWithRootLibAndDeps&periodStart=2022-01-01&periodEnd=2022-12-31')
+        .set('content-type', 'application/fhir+json')
+        .expect(200)
+        .then(response => {
+          expect(response.body.resourceType).toEqual('Library');
+          expect(response.body.dataRequirement).toHaveLength(0);
+        });
+    });
+  });
+
   afterAll(() => {
     return cleanUpTestDatabase();
   });
