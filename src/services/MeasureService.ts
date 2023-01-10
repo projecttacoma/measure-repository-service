@@ -107,6 +107,7 @@ export class MeasureService implements Service<fhir4.Measure> {
     const start = params.periodStart || '2022-01-01';
     const end = params.periodEnd || '2022-12-31';
 
+    logger.info(`Calculating with start ${start} and end ${end}`);
     const { results } = await Calculator.calculateDataRequirements(measureBundle, {
       measurementPeriodStart: start,
       measurementPeriodEnd: end

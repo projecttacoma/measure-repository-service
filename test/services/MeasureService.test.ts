@@ -359,7 +359,7 @@ describe('MeasureService', () => {
         dataRequirement: []
       }
     });
-    
+
     it('returns 200 and a Library for a simple measure with dependencies and no period params', async () => {
       await supertest(server.app)
         .post('/4_0_1/Measure/$data-requirements')
@@ -371,7 +371,7 @@ describe('MeasureService', () => {
           expect(response.body.dataRequirement).toHaveLength(0);
         });
     });
-    
+
     it('returns 200 and a Library for a request with id in the url', async () => {
       await supertest(server.app)
         .post('/4_0_1/Measure/testWithRootLibAndDeps/$data-requirements')
@@ -382,7 +382,7 @@ describe('MeasureService', () => {
           expect(response.body.dataRequirement).toHaveLength(0);
         });
     });
-    
+
     it('returns 200 with passed period parameters', async () => {
       await supertest(server.app)
         .post('/4_0_1/Measure/$data-requirements')
@@ -390,8 +390,8 @@ describe('MeasureService', () => {
           resourceType: 'Parameters',
           parameter: [
             { name: 'id', valueString: 'testWithRootLibAndDeps' },
-            { name: 'periodStart', valueString: '2022-01-01' },
-            { name: 'periodEnd', valueString: '2022-12-31' }
+            { name: 'periodStart', valueDate: '2022-01-01' },
+            { name: 'periodEnd', valueDate: '2022-12-31' }
           ]
         })
         .set('content-type', 'application/fhir+json')
