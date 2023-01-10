@@ -6,6 +6,7 @@ import { createMeasurePackageBundle, createSearchsetBundle } from '../util/bundl
 import { BadRequestError, ResourceNotFoundError } from '../util/errorUtils';
 import { getMongoQueryFromRequest } from '../util/queryUtils';
 import { gatherParams, validateSearchParams } from '../util/validationUtils';
+import { Calculator } from 'fqm-execution';
 
 const logger = loggers.get('default');
 
@@ -45,7 +46,7 @@ export class MeasureService implements Service<fhir4.Measure> {
    * result of sending a POST or GET request to:
    * {BASE_URL}/4_0_1/Measure/$package or {BASE_URL}/4_0_1/Measure/:id/$package
    * creates a bundle of the measure (specified by parameters) and all dependent libraries
-   * requires parameters id and/or url, but also supports version as supplemental (optional)
+   * requires parameters id and/or url and/or identifier, but also supports version as supplemental (optional)
    */
   async package(args: RequestArgs, { req }: RequestCtx) {
     logger.info(`${req.method} ${req.path}`);
@@ -87,5 +88,35 @@ export class MeasureService implements Service<fhir4.Measure> {
     }
 
     return createMeasurePackageBundle(measure[0]);
+  }
+
+  /**
+   * result of sending a POST or GET request to:
+   * {BASE_URL}/4_0_1/Measure/$data-requirements or {BASE_URL}/4_0_1/Measure/:id/$data-requirements
+   * creates a Library with all data requirements for the specified measure
+   * requires parameters id and/or url and/or identifier, but also supports version as supplemental (optional)
+   */
+  async dataRequirements(args: RequestArgs, { req }: RequestCtx) {
+    logger.info(`${req.method} ${req.path}`);
+    logger.info('Using package to create measure bundle');
+    const measureBundle = await this.package(args, { req: req });
+
+    // TODO: Clarify should period start/end be required or have intelligent defaults in fqm-execution to measure effectivePeriod? (fqm-execution defaults to 2019)
+    // short term: default to 2022 if these aren't passed through
+    const params = gatherParams(req.query, args.resource);
+    const start = params.periodStart || '2022-01-01';
+    const end = params.periodEnd || '2022-12-31';
+
+    logger.info(`Calculating with start ${start} and end ${end}`);
+    const { results } = await Calculator.calculateDataRequirements(measureBundle, {
+      measurementPeriodStart: start,
+      measurementPeriodEnd: end
+    });
+    logger.info('Successfully generated $data-requirements report');
+    return results;
+
+    // TODO: Clarify return type from documentation (https://hl7.org/fhir/us/cqfmeasures/STU3/OperationDefinition-Measure-data-requirements.html)
+    // Documentation describes as a library, but the specified type is "Bundle".
+    // For now, this code returns a Library (similar to the Measure operation)
   }
 }

@@ -30,6 +30,30 @@ export const serverConfig: ServerConfig = {
           route: '/:id/$package',
           method: 'POST',
           reference: 'http://hl7.org/fhir/us/cqfmeasures/OperationDefinition/Measure-package'
+        },
+        {
+          name: 'dataRequirements',
+          route: '/$data-requirements',
+          method: 'GET',
+          reference: 'http://hl7.org/fhir/us/cqfmeasures/OperationDefinition/Measure-data-requirements'
+        },
+        {
+          name: 'dataRequirements',
+          route: '/$data-requirements',
+          method: 'POST',
+          reference: 'http://hl7.org/fhir/us/cqfmeasures/OperationDefinition/Measure-data-requirements'
+        },
+        {
+          name: 'dataRequirements',
+          route: '/:id/$data-requirements',
+          method: 'GET',
+          reference: 'http://hl7.org/fhir/us/cqfmeasures/OperationDefinition/Measure-data-requirements'
+        },
+        {
+          name: 'dataRequirements',
+          route: '/:id/$data-requirements',
+          method: 'POST',
+          reference: 'http://hl7.org/fhir/us/cqfmeasures/OperationDefinition/Measure-data-requirements'
         }
       ]
     },

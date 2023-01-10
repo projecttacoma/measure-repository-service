@@ -44,6 +44,7 @@
   "dependencies": {
     "@projecttacoma/node-fhir-server-core": "^2.2.8",
     "dotenv": "^16.0.3",
+    "fqm-execution": "^1.0.3",
     "mongodb": "^4.12.1",
     "uuid": "^9.0.0"
   }

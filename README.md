@@ -57,6 +57,15 @@ The Measure Repository Service server supports `Library` and `Measure` resource 
 - url
 - version
 
+### Data Requirements
+
+The Measure Repository Service server supports the `Measure` `$data-requirements` operation with the SHALL parameters specified in the publishable measure repository section of the [HL7 Measure Repository Docs](https://build.fhir.org/ig/HL7/cqf-measures/measure-repository-service.html#publishable-measure-repository). These parameters are:
+
+- id
+- url
+- version
+- identifier
+
 ## License
 
 Copyright 2022 The MITRE Corporation
